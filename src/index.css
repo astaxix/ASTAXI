@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #000000;
+  --color-secondary: #ea8e24;
+  --color-dark: #111111;
+  --color-light: #f4f4f4;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-body);
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  #root {
+    min-height: 100vh;
+    display: block;
+    visibility: visible;
+    background: #fff;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+  }
+}
+
+/* Leaflet Custom Styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.leaflet-control-attribution {
+  display: none !important;
+}

@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: bookings
+    // Document ID: auto-generated
+    // Fields:
+    //   - id: string
+    //   - pickup: string (required)
+    //   - destination: string (required)
+    //   - pickupCoords: map { lat: number, lon: number }
+    //   - destCoords: map { lat: number, lon: number }
+    //   - date: string (required, YYYY-MM-DD)
+    //   - time: string (required, HH:MM)
+    //   - startTime: string (ISO timestamp)
+    //   - endTime: string (ISO timestamp)
+    //   - vehicleType: string
+    //   - vehicleId: string
+    //   - passengers: number
+    //   - name: string (required)
+    //   - phone: string (required)
+    //   - email: string
+    //   - notes: string
+    //   - price: number (required)
+    //   - distanceKm: number
+    //   - durationMin: number
+    //   - status: string (confirmed/cancelled)
+    //   - createdAt: timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (
+          (request.auth.token.email == "info@as-mietwagen-service.de" && request.auth.token.email_verified == true) ||
+          (request.auth.token.email == "as.taxi.coding@gmail.com" && request.auth.token.email_verified == true)
+        );
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll(['pickup', 'destination', 'date', 'time', 'name', 'phone', 'price', 'status']) &&
+             data.pickup is string && data.pickup.size() > 0 && data.pickup.size() < 500 &&
+             data.destination is string && data.destination.size() > 0 && data.destination.size() < 500 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() < 30 &&
+             data.price is number && data.price >= 0 &&
+             data.status in ['confirmed', 'cancelled'];
+    }
+
+    function isValidAvailability(data) {
+      return data.keys().hasAll(['vehicleId', 'date', 'startTime', 'endTime']) &&
+             data.vehicleId is string &&
+             data.date is string &&
+             data.startTime is string &&
+             data.endTime is string;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['name', 'message', 'rating', 'source']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.message is string && data.message.size() > 0 && data.message.size() < 2000 &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.source in ['local', 'google'] &&
+             (!('date' in data) || data.date is string);
+    }
+
+    function isValidNews(data) {
+      return data.keys().hasAll(['title', 'content', 'date']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 10000 &&
+             data.date is string &&
+             (!('image' in data) || data.image is string);
+    }
+
+    function isValidVisit(data) {
+      return data.keys().hasAll(['path', 'timestamp']) &&
+             data.path is string && data.path.size() > 0 && data.path.size() < 1000 &&
+             data.timestamp is string && data.timestamp.size() > 0 && data.timestamp.size() < 100;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /{path=**} {
+      allow read: if true;
+    }
+
+    match /bookings/{bookingId} {
+      allow create: if isValidBooking(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /availability/{slotId} {
+      allow create: if isValidAvailability(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /news/{postId} {
+      allow write: if isAdmin() && isValidNews(request.resource.data);
+    }
+
+    match /reviews/{reviewId} {
+      allow create: if isValidReview(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /visits/{visitId} {
+      allow create: if isValidVisit(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+  }
+}

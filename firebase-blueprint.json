@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "Booking": {
+      "title": "Booking",
+      "description": "A taxi booking record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "pickup": { "type": "string" },
+        "destination": { "type": "string" },
+        "pickupCoords": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lon": { "type": "number" }
+          }
+        },
+        "destCoords": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lon": { "type": "number" }
+          }
+        },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "startTime": { "type": "string", "description": "ISO timestamp of trip start (Home -> Pickup)" },
+        "endTime": { "type": "string", "description": "ISO timestamp of trip end (Destination -> Home)" },
+        "vehicleType": { "type": "string" },
+        "vehicleId": { "type": "string", "description": "Internal ID of the assigned vehicle" },
+        "passengers": { "type": "number" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "notes": { "type": "string" },
+        "price": { "type": "number" },
+        "hasTrailer": { "type": "boolean" },
+        "distanceKm": { "type": "number" },
+        "durationMin": { "type": "number" },
+        "status": { "type": "string", "enum": ["confirmed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["pickup", "destination", "date", "time", "name", "phone", "price"]
+    },
+    "Availability": {
+      "title": "Availability",
+      "description": "A record of a vehicle being busy",
+      "type": "object",
+      "properties": {
+        "vehicleId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "bookingId": { "type": "string" }
+      },
+      "required": ["vehicleId", "date", "startTime", "endTime"]
+    },
+    "NewsPost": {
+      "title": "NewsPost",
+      "description": "A news article or update",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "date"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A customer review in the guestbook",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "message": { "type": "string" },
+        "rating": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "source": { "type": "string", "enum": ["local", "google"] }
+      },
+      "required": ["name", "message", "rating", "date"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global application settings",
+      "type": "object",
+      "properties": {
+        "googleReviewRating": { "type": "number" },
+        "googleReviewCount": { "type": "number" }
+      }
+    },
+    "Visit": {
+      "title": "Visit",
+      "description": "A record of a page visit",
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "userAgent": { "type": "string" },
+        "referrer": { "type": "string" }
+      },
+      "required": ["path", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/bookings": {
+      "schema": "Booking",
+      "description": "Collection of all taxi bookings"
+    },
+    "/availability": {
+      "schema": "Availability",
+      "description": "Publicly readable vehicle availability slots"
+    },
+    "/news": {
+      "schema": "NewsPost",
+      "description": "Collection of news posts"
+    },
+    "/reviews": {
+      "schema": "Review",
+      "description": "Collection of customer reviews"
+    },
+    "/settings": {
+      "schema": "Settings",
+      "description": "Global settings like Google stats"
+    },
+    "/visits": {
+      "schema": "Visit",
+      "description": "Collection of page visits for internal analytics"
+    }
+  }
+}

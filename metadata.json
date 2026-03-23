@@ -1,0 +1,7 @@
+{
+  "name": "AS Taxi & Mietwagen Service",
+  "description": "Professional car rental and chauffeur service website clone. Features patient transport, airport transfers, and courier services with a modern, responsive design.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
